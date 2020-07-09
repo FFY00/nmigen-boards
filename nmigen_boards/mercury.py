@@ -5,7 +5,6 @@ from nmigen.build import *
 from nmigen.vendor.xilinx_spartan_3_6 import *
 from .resources import *
 
-
 __all__ = ["MercuryPlatform"]
 
 
@@ -25,34 +24,42 @@ class MercuryPlatform(XilinxSpartan3APlatform):
     Mercury and Baseboard Resources: https://www.micro-nova.com/resources-mercury
     """
 
-    device  = "xc3s200a"
+    device = "xc3s200a"
     package = "vq100"
-    speed   = "4"
+    speed = "4"
 
     default_clk = "clk50"
     resources = [
-        Resource("clk50", 0, Pins("P43", dir="i"),
-                 Attrs(IOSTANDARD="LVCMOS33"), Clock(50e6)),
-
-        Resource("button", 0, Pins("P41", dir="i"),
-                 Attrs(IOSTANDARD="LVTTL")),
+        Resource("clk50", 0, Pins("P43", dir="i"), Attrs(IOSTANDARD="LVCMOS33"), Clock(50e6)),
+        Resource("button", 0, Pins("P41", dir="i"), Attrs(IOSTANDARD="LVTTL")),
 
         # The serial interface and flash memory have a shared SPI bus.
         # FPGA is secondary.
-        SPIResource("spi_serial", 0, role="device",
-            cs="P39", clk="P53", mosi="P46", miso="P51",
+        SPIResource(
+            "spi_serial",
+            0,
+            role="device",
+            cs="P39",
+            clk="P53",
+            mosi="P46",
+            miso="P51",
             attrs=Attrs(IOSTANDARD="LVTTL"),
         ),
 
         # FPGA is primary.
-        *SPIFlashResources(0,
-            cs="P27", clk="P53", mosi="P46", miso="P51",
-            attrs=Attrs(IOSTANDARD="LVTTL")
+        *SPIFlashResources(
+            0, cs="P27", clk="P53", mosi="P46", miso="P51", attrs=Attrs(IOSTANDARD="LVTTL")
         ),
 
         # ADC over SPI- FPGA is primary.
-        SPIResource("spi_adc", 0, role="host",
-            cs="P12", clk="P9", mosi="P10", miso="P21",
+        SPIResource(
+            "spi_adc",
+            0,
+            role="host",
+            cs="P12",
+            clk="P9",
+            mosi="P10",
+            miso="P21",
             attrs=Attrs(IOSTANDARD="LVTTL"),
         ),
 
@@ -62,18 +69,19 @@ class MercuryPlatform(XilinxSpartan3APlatform):
         # under SRAMResource) interface to the SRAM. On assertion, this signal
         # will tristate the level-shifters, preventing any output on the 5V
         # GPIO pins (including gpio:30 and gpio:20).
-        Resource("bussw_oe", 0, PinsN("P30N", dir="o"),
-            Attrs(IOSTANDARD="LVTTL"))
+        Resource("bussw_oe", 0, PinsN("P30N", dir="o"), Attrs(IOSTANDARD="LVTTL"))
     ]
 
     # Perhaps define some connectors as having a specific purpose- i.e. a 5V GPIO
     # bus with data, peripheral-select, and control signals?
     connectors = [
-        Connector("gpio", 0, """P59 P60 P61 P62 P64 P57
+        Connector(
+            "gpio", 0, """P59 P60 P61 P62 P64 P57
                                 P56 P52 P50 P49 P85 P84
                                 P83 P78 P77 P65 P70 P71
                                 P72 P73 P5  P4  P6  P98
-                                P94 P93 P90 P89 P88 P86"""),  # 5V I/O- LVTTL.
+                                P94 P93 P90 P89 P88 P86"""
+        ),  # 5V I/O- LVTTL.
         Connector("dio", 0, "P20 P32 P33 P34 P35 P36 P37"),  # Fast 3.3V IO
         # (Directly attached to FPGA)- LVCMOS33.
         Connector("clkio", 0, "P40 P44"),  # Clock IO (Can be used as GPIO)-
@@ -89,19 +97,17 @@ class MercuryPlatform(XilinxSpartan3APlatform):
     # p.add_resources(p.leds)
     # pmod_btn = plat.request("led")
     leds = [
-        Resource("led", 0, Pins("1", dir="o", conn=("led", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("led", 1, Pins("2", dir="o", conn=("led", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("led", 2, Pins("3", dir="o", conn=("led", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("led", 3, Pins("4", dir="o", conn=("led", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
+        Resource("led", 0, Pins("1", dir="o", conn=("led", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("led", 1, Pins("2", dir="o", conn=("led", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("led", 2, Pins("3", dir="o", conn=("led", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("led", 3, Pins("4", dir="o", conn=("led", 0)), Attrs(IOSTANDARD="LVTTL")),
     ]
 
     sram = [
-        SRAMResource(0,
-            cs="P3", we="gpio_0:29",
+        SRAMResource(
+            0,
+            cs="P3",
+            we="gpio_0:29",
             # According to the schematic, A19/Pin 25 on the SRAM is wired to
             # gpio-0:20. However, according to the SRAM's datasheet, pin 25 is
             # a NC. Do not expose for now.
@@ -122,47 +128,33 @@ class MercuryPlatform(XilinxSpartan3APlatform):
     # (DIO, INPUT) pins instead.
     serial = [
         # RX: FTDI D0, TX: FTDI D1
-        UARTResource(0, rx="input_0:1", tx="dio_0:1",
-            attrs=Attrs(IOSTANDARD="LVCMOS33"))
+        UARTResource(0, rx="input_0:1", tx="dio_0:1", attrs=Attrs(IOSTANDARD="LVCMOS33"))
     ]
 
     # The remaining peripherals only make sense w/ the Baseboard installed.
     # See: http://www.micro-nova.com/mercury-baseboard/
     _switches = [
-        Resource("switch", 0, Pins("1", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 1, Pins("2", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 2, Pins("3", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 3, Pins("4", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 4, Pins("5", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 5, Pins("6", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 6, Pins("7", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("switch", 7, Pins("8", dir="i", conn=("gpio", 0)),
-                 Attrs(IOSTANDARD="LVTTL"))
+        Resource("switch", 0, Pins("1", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 1, Pins("2", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 2, Pins("3", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 3, Pins("4", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 4, Pins("5", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 5, Pins("6", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 6, Pins("7", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("switch", 7, Pins("8", dir="i", conn=("gpio", 0)), Attrs(IOSTANDARD="LVTTL"))
     ]
 
     _buttons = [
-        Resource("button", 1, Pins("1", dir="i", conn=("input", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("button", 2, Pins("2", dir="i", conn=("input", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("button", 3, Pins("3", dir="i", conn=("input", 0)),
-                 Attrs(IOSTANDARD="LVTTL")),
-        Resource("button", 4, Pins("4", dir="i", conn=("input", 0)),
-                 Attrs(IOSTANDARD="LVTTL"))
+        Resource("button", 1, Pins("1", dir="i", conn=("input", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("button", 2, Pins("2", dir="i", conn=("input", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("button", 3, Pins("3", dir="i", conn=("input", 0)), Attrs(IOSTANDARD="LVTTL")),
+        Resource("button", 4, Pins("4", dir="i", conn=("input", 0)), Attrs(IOSTANDARD="LVTTL"))
     ]
 
     _vga = [
-        Resource("vga_out", 0,
-            Subsignal("hsync", PinsN("led_0:3", dir="o")),
+        Resource(
+            "vga_out", 0, Subsignal("hsync", PinsN("led_0:3", dir="o")),
             Subsignal("vsync", PinsN("led_0:4", dir="o")),
-
             Subsignal("r", Pins("dio_0:1 dio_0:2 dio_0:3", dir="o")),
             Subsignal("g", Pins("dio_0:4 dio_0:5 dio_0:6", dir="o")),
             Subsignal("b", Pins("dio_0:7 clkio_0:1", dir="o")),
@@ -171,39 +163,44 @@ class MercuryPlatform(XilinxSpartan3APlatform):
     ]
 
     _extclk = [
-        Resource("extclk", 0, Pins("1", dir="i", conn=("clkio", 1)),
-                 Attrs(IOSTANDARD="LVCMOS33"))
+        Resource("extclk", 0, Pins("1", dir="i", conn=("clkio", 1)), Attrs(IOSTANDARD="LVCMOS33"))
     ]
 
     _sevenseg = [
-        Display7SegResource(0,
-            a="gpio_0:13", b="gpio_0:14", c="gpio_0:15", d="gpio_0:16",
-            e="gpio_0:17", f="gpio_0:18", g="gpio_0:19", dp="gpio_0:20",
-            invert=True, attrs=Attrs(IOSTANDARD="LVTTL")
+        Display7SegResource(
+            0,
+            a="gpio_0:13",
+            b="gpio_0:14",
+            c="gpio_0:15",
+            d="gpio_0:16",
+            e="gpio_0:17",
+            f="gpio_0:18",
+            g="gpio_0:19",
+            dp="gpio_0:20",
+            invert=True,
+            attrs=Attrs(IOSTANDARD="LVTTL")
         ),
-        Resource("display_7seg_ctrl", 0,
-            Subsignal("en", Pins("9 10 11 12", dir="o", conn=("gpio", 0))),
+        Resource(
+            "display_7seg_ctrl", 0, Subsignal("en", Pins("9 10 11 12", dir="o", conn=("gpio", 0))),
             Attrs(IOSTANDARD="LVTTL")
         )
     ]
 
     _ps2 = [
-        Resource("ps2", 0,
-             Subsignal("clk", Pins("2", dir="io", conn=("led", 0))),
-             Subsignal("data", Pins("1", dir="io", conn=("led", 0))),
-             Attrs(IOSTANDARD="LVTTL")
+        Resource(
+            "ps2", 0, Subsignal("clk", Pins("2", dir="io", conn=("led", 0))),
+            Subsignal("data", Pins("1", dir="io", conn=("led", 0))), Attrs(IOSTANDARD="LVTTL")
         )
     ]
 
     _audio = [
-        Resource("audio", 0,
-             Subsignal("l", Pins("30", dir="o", conn=("gpio", 0))),
-             Subsignal("r", Pins("29", dir="o", conn=("gpio", 0))),
-             Attrs(IOSTANDARD="LVTTL")
+        Resource(
+            "audio", 0, Subsignal("l", Pins("30", dir="o", conn=("gpio", 0))),
+            Subsignal("r", Pins("29", dir="o", conn=("gpio", 0))), Attrs(IOSTANDARD="LVTTL")
         )
     ]
 
-    baseboard_sram    = _buttons + _vga + _extclk + _ps2
+    baseboard_sram = _buttons + _vga + _extclk + _ps2
     baseboard_no_sram = baseboard_sram + _switches + _sevenseg + _audio
 
     def toolchain_program(self, products, name):

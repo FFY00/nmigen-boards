@@ -5,33 +5,36 @@ from nmigen.build import *
 from nmigen.vendor.lattice_ice40 import *
 from .resources import *
 
-
 __all__ = ["FomuHackerPlatform"]
 
 
 class FomuHackerPlatform(LatticeICE40Platform):
-    device      = "iCE40UP5K"
-    package     = "UWG30"
+    device = "iCE40UP5K"
+    package = "UWG30"
     default_clk = "clk48"
-    resources   = [
-        Resource("clk48", 0, Pins("F5", dir="i"),
-                 Clock(48e6), Attrs(GLOBAL=True, IO_STANDARD="SB_LVCMOS")),
-
-        *LEDResources(pins="A5", invert=True, attrs=Attrs(IO_STANDARD="SB_LVCMOS")),
-        RGBLEDResource(0,
-            r="C5", g="B5", b="A5", invert=True,
-            attrs=Attrs(IO_STANDARD="SB_LVCMOS")
+    resources = [
+        Resource(
+            "clk48", 0, Pins("F5", dir="i"), Clock(48e6),
+            Attrs(GLOBAL=True, IO_STANDARD="SB_LVCMOS")
         ),
-
-        Resource("usb", 0,
+        *LEDResources(pins="A5", invert=True, attrs=Attrs(IO_STANDARD="SB_LVCMOS")),
+        RGBLEDResource(
+            0, r="C5", g="B5", b="A5", invert=True, attrs=Attrs(IO_STANDARD="SB_LVCMOS")
+        ),
+        Resource(
+            "usb",
+            0,
             Subsignal("d_p", Pins("A4")),
             Subsignal("d_n", Pins("A2")),
             Subsignal("pullup", Pins("D5")),
             Attrs(IO_STANDARD="SB_LVCMOS"),
         ),
-
-        *SPIFlashResources(0,
-            cs="C1", clk="D1", mosi="F1", miso="E1",
+        *SPIFlashResources(
+            0,
+            cs="C1",
+            clk="D1",
+            mosi="F1",
+            miso="E1",
             attrs=Attrs(IO_STANDARD="SB_LVCMOS"),
         ),
     ]

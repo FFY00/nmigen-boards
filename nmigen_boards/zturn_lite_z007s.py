@@ -1,18 +1,17 @@
 from nmigen.build import *
 from nmigen.vendor.xilinx_7series import *
 
-
 __all__ = ["ZTurnLiteZ007SPlatform"]
 
 
 class ZTurnLiteZ007SPlatform(Xilinx7SeriesPlatform):
-    device     = "xc7z007s"
-    package    = "clg400"
-    speed      = "1"
-    resources  = []
+    device = "xc7z007s"
+    package = "clg400"
+    speed = "1"
+    resources = []
     connectors = [
-        Connector("expansion", 0,
-            "-   -   "
+        Connector(
+            "expansion", 0, "-   -   "
             "B19 E17 "
             "A20 D18 "
             "-   -   "

@@ -1,11 +1,9 @@
 from nmigen.build import *
 
-
 __all__ = ["Display7SegResource"]
 
 
-def Display7SegResource(*args, a, b, c, d, e, f, g, dp=None, invert=False,
-                        conn=None, attrs=None):
+def Display7SegResource(*args, a, b, c, d, e, f, g, dp=None, invert=False, conn=None, attrs=None):
     ios = []
     ios.append(Subsignal("a", Pins(a, dir="o", invert=invert, conn=conn, assert_width=1)))
     ios.append(Subsignal("b", Pins(b, dir="o", invert=invert, conn=conn, assert_width=1)))

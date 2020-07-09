@@ -1,11 +1,22 @@
 from nmigen.build import *
 
-
 __all__ = ["UARTResource", "IrDAResource", "SPIResource"]
 
 
-def UARTResource(*args, rx, tx, rts=None, cts=None, dtr=None, dsr=None, dcd=None, ri=None,
-                 conn=None, attrs=None, role=None):
+def UARTResource(
+    *args,
+    rx,
+    tx,
+    rts=None,
+    cts=None,
+    dtr=None,
+    dsr=None,
+    dcd=None,
+    ri=None,
+    conn=None,
+    attrs=None,
+    role=None
+):
     if any(line is not None for line in (rts, cts, dtr, dsr, dcd, ri)):
         assert role in ("dce", "dte")
     if role == "dte":
@@ -35,8 +46,7 @@ def UARTResource(*args, rx, tx, rts=None, cts=None, dtr=None, dsr=None, dcd=None
     return Resource.family(*args, default_name="uart", ios=io)
 
 
-def IrDAResource(number, *, rx, tx, en=None, sd=None,
-                 conn=None, attrs=None):
+def IrDAResource(number, *, rx, tx, en=None, sd=None, conn=None, attrs=None):
     # Exactly one of en (active-high enable) or sd (shutdown, active-low enable) should
     # be specified, and it is mapped to a logic level en subsignal.
     assert (en is not None) ^ (sd is not None)
@@ -53,8 +63,9 @@ def IrDAResource(number, *, rx, tx, en=None, sd=None,
     return Resource("irda", number, *io)
 
 
-def SPIResource(*args, cs, clk, mosi, miso, int=None, reset=None,
-                conn=None, attrs=None, role="host"):
+def SPIResource(
+    *args, cs, clk, mosi, miso, int=None, reset=None, conn=None, attrs=None, role="host"
+):
     assert role in ("host", "device")
 
     io = []

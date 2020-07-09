@@ -6,7 +6,6 @@ from nmigen.vendor.lattice_ice40 import *
 from .resources import *
 from .upduino_v1 import UpduinoV1Platform
 
-
 __all__ = ["UpduinoV2Platform"]
 
 
@@ -15,8 +14,7 @@ class UpduinoV2Platform(UpduinoV1Platform):
     # programmer and a 12MHz oscillator which is NC by default.
     resources = UpduinoV1Platform.resources + [
         # Solder pin 12 to the adjacent 'J8' osc_out pin to enable.
-        Resource("clk12", 0, Pins("12", dir="i"),
-                 Clock(12e6), Attrs(IO_STANDARD="SB_LVCMOS")),
+        Resource("clk12", 0, Pins("12", dir="i"), Clock(12e6), Attrs(IO_STANDARD="SB_LVCMOS")),
     ]
 
     def toolchain_program(self, products, name):

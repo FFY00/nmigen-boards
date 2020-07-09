@@ -3,7 +3,6 @@ import itertools
 from nmigen import *
 from nmigen.build import ResourceError
 
-
 __all__ = ["Blinky"]
 
 
@@ -20,18 +19,18 @@ class Blinky(Elaboratable):
                     break
             return resources
 
-        leds     = [res.o for res in get_all_resources("led")]
-        buttons  = [res.i for res in get_all_resources("button")]
+        leds = [res.o for res in get_all_resources("led")]
+        buttons = [res.i for res in get_all_resources("button")]
         switches = [res.i for res in get_all_resources("switch")]
 
-        inverts  = [0 for _ in leds]
+        inverts = [0 for _ in leds]
         for index, button in zip(itertools.cycle(range(len(inverts))), buttons):
             inverts[index] ^= button
         for index, switch in zip(itertools.cycle(range(len(inverts))), switches):
             inverts[index] ^= switch
 
         clk_freq = platform.default_clk_frequency
-        timer = Signal(range(int(clk_freq//2)), reset=int(clk_freq//2) - 1)
+        timer = Signal(range(int(clk_freq // 2)), reset=int(clk_freq // 2) - 1)
         flops = Signal(len(leds))
 
         m.d.comb += Cat(leds).eq(flops ^ Cat(inverts))

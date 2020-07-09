@@ -1,6 +1,5 @@
 from nmigen.build import *
 
-
 __all__ = ["LEDResources", "RGBLEDResource", "ButtonResources", "SwitchResources"]
 
 
